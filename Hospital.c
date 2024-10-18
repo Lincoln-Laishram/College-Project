@@ -8,24 +8,24 @@ int appointmentRemaining = 99;
 
 struct Node
 {
+    int id;
     char name[30];
     char address[50];
     char phoneNumber[20];
     char disease[50];
     struct Node *next;
 };
-
 struct Node *head = NULL;
 
 void InsertData(char name[], char address[], char phoneNumber[], char disease[]);
-void CancelAppointment(char name[]);
+void CancelAppointment(int);
+
 void DisplayData();
 
 int main()
 {
     struct Node patient;
     int choice;
-
     printf("* * * * * * * * * * * * * * *  ");
     printf("\n*  WELCOME TO NIELIT CLINIC *\n");
     printf("* * * * * * * * * * * * * * * ");
@@ -45,6 +45,7 @@ int main()
             if (appointmentRemaining == 0)
             {
                 printf("\n APPOINTMENT SLOT IS FULL...");
+                break;
             }
             else
             {
@@ -57,15 +58,17 @@ int main()
                 printf(" Enter your disease: ");
                 scanf("%s", patient.disease);
                 InsertData(patient.name, patient.address, patient.phoneNumber, patient.disease);
-                printf("\n ********* %s, your reservation has been set successful *********\n", patient.name);
                 serialNumber++;
                 appointmentRemaining--;
                 break;
             }
         case 2:
-            printf("Enter the name of the patient: ");
-            scanf("%s", &patient.name);
-            CancelAppointment(patient.name);
+            printf("Enter the Appointment ID: ");
+            int idToCancel;
+            scanf("%d", &idToCancel);
+            CancelAppointment(idToCancel);
+            break;
+
         case 3:
             DisplayData();
             break;
@@ -85,11 +88,14 @@ int main()
 void InsertData(char name[], char address[], char phoneNumber[], char disease[])
 {
     struct Node *newNode = (struct Node *)malloc(sizeof(struct Node));
-    struct Node *temp = head;
+    static int nextID = 1110;
+
     strcpy(newNode->name, name);
     strcpy(newNode->address, address);
     strcpy(newNode->phoneNumber, phoneNumber);
     strcpy(newNode->disease, disease);
+
+    newNode->id = nextID++;
     newNode->next = NULL;
 
     if (head == NULL)
@@ -98,29 +104,31 @@ void InsertData(char name[], char address[], char phoneNumber[], char disease[])
     }
     else
     {
+        struct Node *temp = head;
         while (temp->next != NULL)
         {
             temp = temp->next;
         }
         temp->next = newNode;
     }
+    printf("\nAppointment successfully set for %s.\nYour Appointment ID is: %d\n", name, newNode->id);
 }
 
-void CancelAppointment(char name[])
+void CancelAppointment(int appointmentID)
 {
     struct Node *temp = head;
     struct Node *prev = NULL;
 
-    if (temp != NULL && strcmp(temp->name, name) == 0)
+    if (temp != NULL && temp->id == appointmentID)
     {
         head = temp->next;
         free(temp);
-        printf("\n[ ---'%s',your appointment has been cancelled successfully --- ]\n", name);
+        printf("\n[ --- Your appointment has been cancelled successfully --- ]\n");
         appointmentRemaining++;
         return;
     }
 
-    while (temp != NULL && strcmp(temp->name, name) != 0)
+    while (temp != NULL && temp->id != appointmentID)
     {
         prev = temp;
         temp = temp->next;
@@ -128,16 +136,14 @@ void CancelAppointment(char name[])
 
     if (temp == NULL)
     {
-        printf("\n");
-        printf("[ ---OPPS, no appointment fot '%s' found--- ]", name);
-        printf("\n");
-        printf("\n");
+        printf("\n[ ---No appointment found with ID '%d' --- ]\n", appointmentID);
         return;
     }
 
     prev->next = temp->next;
     free(temp);
-    printf("\n[ ---'%s',your appointment has been cancelled successfully --- ]\n", name);
+
+    printf("\n[ ---Appointment with ID '%d' has been cancelled successfully --- ]\n", appointmentID);
     appointmentRemaining++;
 }
 
@@ -145,8 +151,6 @@ void DisplayData()
 {
     struct Node *temp = head;
     int currentSerialNumber = 1;
-    int currentAppointmentID = 1110;
-    int remainingAppointments = 99;
 
     if (temp == NULL)
     {
@@ -163,17 +167,14 @@ void DisplayData()
         {
             printf("Serial Number: %d", currentSerialNumber);
             printf("\n-----------------------------------------------\n");
-            printf("\tPatient's ID:           %d", currentAppointmentID);
+            printf("\tPatient's ID:           %d", temp->id);
             printf("\n\tPatient's Name:        %s", temp->name);
             printf("\n\tPatient's Address:     %s", temp->address);
             printf("\n\tPhone Number:          %s", temp->phoneNumber);
             printf("\n\tDisease:               %s", temp->disease);
-            printf("\n\tAppointment remaining: %d", remainingAppointments);
             printf("\n-----------------------------------------------\n");
             temp = temp->next;
             currentSerialNumber++;
-            currentAppointmentID++;
-            remainingAppointments--;
         }
     }
     printf("\n");
